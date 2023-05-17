@@ -26,7 +26,7 @@ def count_pixel_colors(image_path):
     return color_count
 
 
-image_path = 'image.png'
+image_path = 'road_image2.png'
 color_count = count_pixel_colors(image_path)
 
 sorted_color_count = dict(
@@ -41,9 +41,9 @@ total_pixels = sum(sorted_color_count.values())
 color_ratio = {color: count / total_pixels for color,
                count in sorted_color_count.items()}
 
-# ''' value에 따른 오름차순 정렬 '''
-# for color, ratio in color_ratio.items():
-#     print(f"{color}: {ratio * 100:.2f}%")
+''' value에 따른 오름차순 정렬 '''
+for color, ratio in color_ratio.items():
+    print(f"{color}: {ratio * 100:.2f}%")
 
 # # csv 파일로 저장
 # file = open('test.csv', 'w')
@@ -55,23 +55,23 @@ color_ratio = {color: count / total_pixels for color,
 #     file.write(f"{color}:{ratio * 100:.2f},")
 # file.write("\n")
 
-''' rgb 값에 따른 오름차순 정렬 '''
-file = open('test2.csv', 'w')
+# ''' rgb 값에 따른 오름차순 정렬 '''
+# file = open('test2.csv', 'w')
 
-# 추후 각 rgb 값들에 대해 index(구분 이름) 설정할 예정
-rgbs = [
-    (170, 211, 223), (200, 250, 204), (217, 208, 201), (224, 223, 223), (238,
-                                                                         238, 238), (242, 218, 217), (247, 250, 191), (247, 250, 191), (255, 255, 229), (255, 255, 255)
-]
-for i in range(0, 9):
-    file.write(f"{rgbs[i]},")
-file.write(f"{rgbs[9]}\n")
+# # 추후 각 rgb 값들에 대해 index(구분 이름) 설정할 예정
+# rgbs = [
+#     (170, 211, 223), (200, 250, 204), (217, 208, 201), (224, 223, 223), (238,
+#                                                                          238, 238), (242, 218, 217), (247, 250, 191), (247, 250, 191), (255, 255, 229), (255, 255, 255)
+# ]
+# for i in range(0, 9):
+#     file.write(f"{rgbs[i]},")
+# file.write(f"{rgbs[9]}\n")
 
-for color, ratio in sorted(color_ratio.items()):
-    print(f"{color}: {ratio * 100:.2f}%")
-    # csv 파일로 저장
-    file.write(f"{ratio * 100:.2f},")
-file.write("\n")
+# for color, ratio in sorted(color_ratio.items()):
+#     print(f"{color}: {ratio * 100:.2f}%")
+#     # csv 파일로 저장
+#     file.write(f"{ratio * 100:.2f},")
+# file.write("\n")
 
 
 '''
