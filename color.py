@@ -1,12 +1,16 @@
 from PIL import Image
 from itertools import islice
+import os, natsort
 
-# (242, 239, 233) = None
-# (224, 233, 233) = 큰 건물
-# (255, 255, 255) = 도로
-# 추가 예정
+# (242, 239, 233) = 공백
+keywords = {(255,255,255):"도로", (249,178,156):"큰도로", (252, 214, 164):"큰도로", (247, 250, 191):"큰도로", (173, 209, 158):"숲",
+                (200, 250, 204):"공원", (170, 224, 203):"운동장", (224, 223, 223):"주거지역", (170, 211, 223):"물", (217, 208, 201):"건물", (255, 255, 229):"학교"}
 
+def select_img(image_path):
+    color_count = count_pixel_colors(image_path)
+    color_ratio_measure(color_count)
 
+# 각 rgb 값 세는 함수
 def count_pixel_colors(image_path):
     image = Image.open(image_path)
     image = image.convert('RGBA')  # 이미지를 RGBA 형식으로 변환
@@ -16,63 +20,42 @@ def count_pixel_colors(image_path):
 
     for pixel in image_data:
         r, g, b, a = pixel
+        if (r, g, b) not in keywords:
+            continue
+        index = keywords[(r, g, b)]
         if a == 255:
-            if (r, g, b) in color_count:
-                color_count[(r, g, b)] += 1
+            if index in color_count:
+                color_count[index] += 1
             else:
-                color_count[(r, g, b)] = 1
-    del color_count[(242, 239, 233)]  # 공백 컬러 삭제
+                color_count[index] = 1
+    # del color_count[(242, 239, 233)]  # 공백 컬러 삭제
 
     return color_count
 
-
-image_path = 'road_image2.png'
-color_count = count_pixel_colors(image_path)
-
-sorted_color_count = dict(
-    sorted(color_count.items(), key=lambda x: x[1], reverse=True))  # 내림차순 정렬
-
-sorted_color_count = dict(islice(sorted_color_count.items(), 10))
-print(sorted_color_count)  # 픽셀 갯수 상위 10개인 RGB 값 딕셔너리만 출력
-
-print()
 # 비율 측정
-total_pixels = sum(sorted_color_count.values())
-color_ratio = {color: count / total_pixels for color,
-               count in sorted_color_count.items()}
+def color_ratio_measure(color_count):
+    indexes = {"도로":0, "큰도로":0, "숲":0, "공원":0, "운동장":0, "주거지역":0, "물":0, "건물":0, "학교":0}
 
-''' value에 따른 오름차순 정렬 '''
-for color, ratio in color_ratio.items():
-    print(f"{color}: {ratio * 100:.2f}%")
+    total_pixels = sum(color_count.values())
+    color_ratio = {color: count / total_pixels for color,
+                count in color_count.items()}
+    for color, ratio in color_ratio.items():
+        print(f"{color}: {ratio * 100:.2f}%")
+        indexes[color] = round(ratio*100, 2)
 
-# # csv 파일로 저장
-# file = open('test.csv', 'w')
-# for i in range(1, 10):
-#     file.write(f"{i},")
-# file.write("10\n")
+    # csv 파일로 저장
+    keys_list = list(indexes.keys())
+    file = open('test2.csv', 'a')
 
-# for color, ratio in color_ratio.items():
-#     file.write(f"{color}:{ratio * 100:.2f},")
-# file.write("\n")
+    for i in range(len(keys_list)):
+        file.write(str(indexes[keys_list[i]]))
+        file.write(",")
+    file.write("()\n") # 키워드는 수동 설정
 
-# ''' rgb 값에 따른 오름차순 정렬 '''
-# file = open('test2.csv', 'w')
+images = natsort.natsorted(os.listdir('imgs'))
 
-# # 추후 각 rgb 값들에 대해 index(구분 이름) 설정할 예정
-# rgbs = [
-#     (170, 211, 223), (200, 250, 204), (217, 208, 201), (224, 223, 223), (238,
-#                                                                          238, 238), (242, 218, 217), (247, 250, 191), (247, 250, 191), (255, 255, 229), (255, 255, 255)
-# ]
-# for i in range(0, 9):
-#     file.write(f"{rgbs[i]},")
-# file.write(f"{rgbs[9]}\n")
-
-# for color, ratio in sorted(color_ratio.items()):
-#     print(f"{color}: {ratio * 100:.2f}%")
-#     # csv 파일로 저장
-#     file.write(f"{ratio * 100:.2f},")
-# file.write("\n")
-
+for img in images:
+    select_img(os.path.join('imgs', img))
 
 '''
 추후 계획은 지도에서 색깔로 구분할 수 있는 index들을 (10개 정도?) 설정할 예정.
